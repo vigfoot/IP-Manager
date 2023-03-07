@@ -28,6 +28,8 @@ public class IpAddressManager {
         socket.connect(new InetSocketAddress("vigfoot.github.io", 443));
         String hostAddress = socket.getLocalAddress().getHostAddress();
 
+        System.out.println("AS-IS Address: " + localIpAddress);
+        System.out.println("TO-BE Address: " + hostAddress);
         if (!Objects.equals(localIpAddress, hostAddress)){
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
