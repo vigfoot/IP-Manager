@@ -3,6 +3,7 @@ package com.vigfoot.ipmanager;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,12 +15,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
 
+@Slf4j
 @RequiredArgsConstructor
 public class IpAddressManager {
 
     @Value("${spring.mail.username}")
     private String emailAddress;
-    private static String localIpAddress = "start";
+    private static String localIpAddress = "127.0.0.1";
     private final JavaMailSender javaMailSender;
 
     @Scheduled(fixedDelay = 1000L)
@@ -28,8 +30,8 @@ public class IpAddressManager {
         socket.connect(new InetSocketAddress("vigfoot.github.io", 443));
         String hostAddress = socket.getLocalAddress().getHostAddress();
 
-        System.out.println("AS-IS Address: " + localIpAddress);
-        System.out.println("TO-BE Address: " + hostAddress);
+        log.info("AS-IS Address: {}", localIpAddress);
+        log.info("TO-BE Address: {}", hostAddress);
         if (!Objects.equals(localIpAddress, hostAddress)){
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
