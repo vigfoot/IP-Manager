@@ -14,13 +14,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
 
-@RestController
 @RequiredArgsConstructor
 public class IpAddressManager {
 
     @Value("${spring.mail.username}")
     private String emailAddress;
-    private static String localIpAddress = null;
+    private static String localIpAddress = "start";
     private final JavaMailSender javaMailSender;
 
     @Scheduled(fixedDelay = 1000L)
@@ -38,7 +37,6 @@ public class IpAddressManager {
             localIpAddress = hostAddress;
             javaMailSender.send(message);
         }
-
         socket.close();
     }
 }
