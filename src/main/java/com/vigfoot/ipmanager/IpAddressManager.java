@@ -1,25 +1,44 @@
 package com.vigfoot.ipmanager;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Objects;
 
-@RestController("/ip")
+@RestController
+@RequiredArgsConstructor
 public class IpAddressManager {
 
-    @GetMapping("/verify")
-    public Mono<Boolean> verifyConnection() {
-        try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress("google.com", 80));
-            System.out.println(socket.getLocalAddress().getHostAddress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    @Value("${spring.mail.username}")
+    private String emailAddress;
+    private static String localIpAddress = null;
+    private final JavaMailSender javaMailSender;
+
+    @Scheduled(fixedDelay = 1000L)
+    void verifyConnection() throws IOException, MessagingException {
+        Socket socket = new Socket();
+        socket.connect(new InetSocketAddress("vigfoot.github.io", 443));
+        String hostAddress = socket.getLocalAddress().getHostAddress();
+
+        if (!Objects.equals(localIpAddress, hostAddress)){
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setSubject("[IP Manager] converted IP Address of GE40");
+            helper.setTo(emailAddress);
+            helper.setText("<p>[AS-IS] " + localIpAddress + "</p><p>[TO-BE]" + hostAddress + "<p>", true);
+            localIpAddress = hostAddress;
+            javaMailSender.send(message);
         }
 
-        return Mono.empty();
+        socket.close();
     }
 }
