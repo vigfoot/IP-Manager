@@ -1,4 +1,4 @@
-package com.vigfoot.ipmanager.controller;
+package com.vigfoot.ipmanager;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-@RestController
-public class Controller {
+@RestController("/ip")
+public class IpAddressManager {
 
-    @GetMapping("/ip/verify")
+    @GetMapping("/verify")
     public Mono<Boolean> verifyConnection() {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress("google.com", 80));
